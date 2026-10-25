@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zaki's Zapatos - Catálogo de Moda de Puerto Rico</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amazon: {
+                            blue: '#131921',
+                            lightBlue: '#232f3e',
+                            yellow: '#febd69',
+                            yellowHover: '#f3a847',
+                            orange: '#e47911',
+                            bg: '#eaeded',
+                            cardBg: '#ffffff',
+                            prime: '#00a8e1'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #eaeded; }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .color-pill {
+            transition: all 0.15s ease-in-out;
+        }
+        .color-pill.active {
+            ring: 2px;
+            ring-offset: 1px;
+            border-color: #e47911;
+        }
+        /* Custom scrollbar for drawer */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800 flex flex-col justify-between">
+
+    <!-- Header Section -->
+    <header class="sticky top-0 z-40">
+        <!-- Main Top Header -->
+        <div class="bg-amazon-blue text-white px-4 py-2.5 flex items-center justify-between flex-wrap md:flex-nowrap gap-3">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="resetFilters()">
+                <div class="bg-amazon-yellow text-amazon-blue p-1.5 rounded font-black text-xl tracking-wider uppercase flex items-center gap-1">
+                    <i class="fa-solid fa-shoe-prints"></i>
+                    <span>Zaki's</span>
+                </div>
+                <div class="leading-tight hidden sm:block">
+                    <span class="text-sm font-bold block text-amazon-yellow">Zapatos.pr</span>
+                    <span class="text-xs text-gray-300 block">Moda de Puerto Rico</span>
+                </div>
+            </div>
+
+            <!-- Delivery Location -->
+            <div class="hidden md:flex items-center space-x-1 text-xs hover:border hover:border-white p-1.5 rounded cursor-pointer text-gray-200">
+                <i class="fa-solid fa-location-dot text-amazon-yellow text-base"></i>
+                <div>
+                    <div class="text-gray-400 text-[10px] leading-3">Enviar a</div>
+                    <div class="font-bold text-white leading-3">San Juan, PR</div>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="flex-1 max-w-2xl mx-2 flex">
+                <select id="categorySelect" onchange="handleCategoryFilter()" class="bg-gray-200 text-gray-700 text-xs px-2.5 py-2 rounded-l border-r border-gray-300 focus:outline-none hover:bg-gray-300 cursor-pointer">
+                    <option value="all">Todas</option>
+                    <option value="1">Tradicional</option>
+                    <option value="2">Moderna y Urbana</option>
+                </select>
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Buscar: Ropa tradicional y moderna de Puerto Rico" class="w-full px-3 py-2 text-sm text-gray-800 focus:outline-none">
+                <button onclick="handleSearch()" class="bg-amazon-yellow hover:bg-amazon-yellowHover text-amazon-blue px-5 rounded-r flex items-center justify-center transition">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Quick Links / Language -->
+            <div class="hidden lg:flex items-center space-x-4 text-xs">
+                <div class="flex items-center space-x-1 cursor-pointer hover:border border-white p-1 rounded">
+                    <span class="font-bold text-sm">🇵🇷 ES</span>
+                </div>
+                <div class="hover:border border-white p-1 rounded cursor-pointer">
+                    <div class="text-[10px]">Hola, Identifícate</div>
+                    <div class="font-bold text-xs">Cuenta y Listas</div>
+                </div>
+            </div>
+
+            <!-- Cart Drawer Trigger -->
+            <button onclick="toggleCartDrawer()" class="relative flex items-center space-x-1 hover:border hover:border-white p-1.5 rounded cursor-pointer text-white">
+                <div class="relative">
+                    <i class="fa-solid fa-cart-shopping text-2xl text-white"></i>
+                    <span id="cartCount" class="absolute -top-1 -right-2 bg-amazon-orange text-white font-bold text-xs rounded-full h-5 w-5 flex items-center justify-center border-2 border-amazon-blue">0</span>
+                </div>
+                <span class="font-bold text-sm hidden sm:inline ml-1">Carrito</span>
+            </button>
+        </div>
+
+        <!-- Secondary Navigation Bar -->
+        <nav class="bg-amazon-lightBlue text-white text-xs px-4 py-2 flex items-center space-x-4 overflow-x-auto whitespace-nowrap shadow-md">
+            <button onclick="filterNav('all')" class="flex items-center space-x-1 hover:text-amazon-yellow font-medium">
+                <i class="fa-solid fa-bars"></i>
+                <span>Todo</span>
+            </button>
+            <button onclick="filterNav('all')" class="hover:text-amazon-yellow font-medium">Moda de Puerto Rico</button>
+            <button onclick="filterNav('1')" class="hover:text-amazon-yellow font-medium">Ropa Tradicional</button>
+            <button onclick="filterNav('2')" class="hover:text-amazon-yellow font-medium">Ropa Moderna</button>
+            <button onclick="filterNav('deals')" class="hover:text-amazon-yellow font-medium text-amber-300 font-bold">Ofertas del Día</button>
+            <button onclick="filterNav('2')" class="hover:text-amazon-yellow font-medium">Tendencias Urbanas</button>
+            <button onclick="filterNav('pants')" class="hover:text-amazon-yellow font-medium">Pantalones y Shorts</button>
+            <button onclick="filterNav('shoes')" class="hover:text-amazon-yellow font-medium">Zapatillas</button>
+            <button onclick="filterNav('bestsellers')" class="hover:text-amazon-yellow font-medium">Más Vendidos</button>
+            <span class="ml-auto text-amazon-yellow font-bold hidden md:inline-flex items-center gap-1">
+                <i class="fa-solid fa-truck-fast"></i> Entrega Rápida Amazon Prime
+            </span>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
+        
+        <!-- Banner / Header Notice -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-4">
+                <div class="bg-blue-100 p-3 rounded-full text-blue-700">
+                    <i class="fa-solid fa-store text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900">Catálogo de Moda de Puerto Rico</h1>
+                    <p class="text-xs text-gray-500">San Juan, PR • Página 1 de 2 | Envíos locales y entregas Prime</p>
+                </div>
+            </div>
+
+            <!-- Sorting & Filter Controls -->
+            <div class="flex items-center space-x-3 w-full md:w-auto">
+                <span class="text-xs font-semibold text-gray-600 whitespace-nowrap">Ordenar por:</span>
+                <select id="sortSelect" onchange="renderProducts()" class="bg-gray-50 border border-gray-300 text-xs rounded-md p-2 focus:ring-amazon-yellow focus:border-amazon-yellow w-full md:w-auto">
+                    <option value="default">Relevancia</option>
+                    <option value="price-low">Precio: Menor a Mayor</option>
+                    <option value="price-high">Precio: Mayor a Menor</option>
+                    <option value="rating">Mejor Valorados</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- SECTION 1: Moda Tradicional de Puerto Rico -->
+        <section id="section1-container" class="mb-10">
+            <div class="flex items-center justify-between border-b-2 border-amazon-orange pb-2 mb-4">
+                <h2 class="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-fan text-amazon-orange"></i>
+                    <span>Sección 1: Moda Tradicional de Puerto Rico</span>
+                    <span class="text-xs bg-gray-200 text-gray-700 font-normal px-2 py-0.5 rounded-full">(4 Artículos)</span>
+                </h2>
+                <span class="text-xs text-amazon-prime font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-check text-xs"></i> prime deliver a Puerto Rico
+                </span>
+            </div>
+
+            <!-- Grid Section 1 -->
+            <div id="grid-section-1" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Dynamically Inserted -->
+            </div>
+        </section>
+
+        <!-- Cultural Connection Note Box -->
+        <div id="cultural-note" class="bg-amber-50 border-l-4 border-amazon-yellow p-5 rounded-r-lg shadow-sm mb-10">
+            <div class="flex items-start space-x-3">
+                <div class="text-amazon-orange text-2xl mt-0.5">
+                    <i class="fa-solid fa-landmark"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 text-sm md:text-base uppercase tracking-wide mb-1">
+                        Nota Cultural sobre Puerto Rico (Cultural Connection):
+                    </h3>
+                    <p class="text-xs md:text-sm text-gray-700 leading-relaxed">
+                        <strong class="text-amazon-orange">Ropa Tradicional:</strong> La guayabera y el vestido jipao son prendas tradicionales icónicas de Puerto Rico. La gente usa la guayabera en bodas, fiestas formales y eventos culturales porque es elegante y fresca en el clima tropical. El jipao se usa durante los bailes folklóricos tradicionales.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Moda Moderna y Urbana de Puerto Rico -->
+        <section id="section2-container" class="mb-10">
+            <div class="flex items-center justify-between border-b-2 border-blue-600 pb-2 mb-4">
+                <h2 class="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-shirt text-blue-600"></i>
+                    <span>Sección 2: Moda Moderna y Urbana de Puerto Rico</span>
+                    <span class="text-xs bg-gray-200 text-gray-700 font-normal px-2 py-0.5 rounded-full">(6 Artículos)</span>
+                </h2>
+                <span class="text-xs text-amazon-prime font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-bolt text-xs"></i> Entrega Rápida Amazon Prime
+                </span>
+            </div>
+
+            <!-- Grid Section 2 -->
+            <div id="grid-section-2" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Dynamically Inserted -->
+            </div>
+        </section>
+
+        <!-- Personal Comparison Box -->
+        <div id="personal-note" class="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-lg shadow-sm mb-8">
+            <div class="flex items-start space-x-3">
+                <div class="text-blue-600 text-2xl mt-0.5">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 text-sm md:text-base uppercase tracking-wide mb-1">
+                        Comparación Personal con mi Propia Ropa (Personal Comparison):
+                    </h3>
+                    <p class="text-xs md:text-sm text-gray-700 leading-relaxed">
+                        <strong class="text-blue-700">Mi Estilo Personal:</strong> En mi vida diaria, mi estilo es más parecido a la moda moderna urbana de Puerto Rico. Yo prefiero ropa cómoda como t-shirts de algodón, shorts y zapatillas deportivas porque voy a la escuela todos los días. No uso la guayabera tradicional frecuentemente, pero me gusta la ropa ligera cuando hace calor.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-amazon-lightBlue text-white text-xs mt-12">
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-full bg-slate-700 hover:bg-slate-600 py-3 text-center font-semibold transition">
+            Volver arriba
+        </button>
+        <div class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 border-b border-gray-700">
+            <div>
+                <h4 class="font-bold mb-2 text-sm text-gray-200">Conócenos</h4>
+                <ul class="space-y-1 text-gray-400">
+                    <li class="hover:underline cursor-pointer">Sobre Zaki's Zapatos</li>
+                    <li class="hover:underline cursor-pointer">Moda Puertorriqueña</li>
+                    <li class="hover:underline cursor-pointer">Sostenibilidad</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-2 text-sm text-gray-200">Gana Dinero</h4>
+                <ul class="space-y-1 text-gray-400">
+                    <li class="hover:underline cursor-pointer">Vender en Zaki's</li>
+                    <li class="hover:underline cursor-pointer">Programa de Afiliados</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-2 text-sm text-gray-200">Métodos de Pago</h4>
+                <ul class="space-y-1 text-gray-400">
+                    <li class="hover:underline cursor-pointer">Tarjetas de Crédito/Débito</li>
+                    <li class="hover:underline cursor-pointer">ATH Móvil Puerto Rico</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-2 text-sm text-gray-200">Ayuda</h4>
+                <ul class="space-y-1 text-gray-400">
+                    <li class="hover:underline cursor-pointer">Rastrear Pedidos</li>
+                    <li class="hover:underline cursor-pointer">Tarifas de Envío</li>
+                    <li class="hover:underline cursor-pointer">Devoluciones</li>
+                </ul>
+            </div>
+        </div>
+        <div class="bg-amazon-blue py-6 text-center text-gray-400">
+            <div class="flex justify-center items-center space-x-2 mb-2">
+                <span class="font-bold text-white">Zaki's Zapatos</span>
+                <span>• San Juan, Puerto Rico</span>
+            </div>
+            <p>&copy; 2026 Zaki's Zapatos.pr - Catálogo interactivo de Moda Puertorriqueña.</p>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Slide-over Drawer -->
+    <div id="cartDrawer" class="fixed inset-0 overflow-hidden z-50 hidden">
+        <div class="absolute inset-0 bg-gray-900 bg-opacity-50 transition-opacity" onclick="toggleCartDrawer()"></div>
+        <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+            <div class="w-screen max-w-md bg-white shadow-xl flex flex-col">
+                <div class="p-4 bg-amazon-blue text-white flex items-center justify-between">
+                    <h2 class="text-base font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-cart-shopping text-amazon-yellow"></i>
+                        <span>Tu Carrito de Compras</span>
+                    </h2>
+                    <button onclick="toggleCartDrawer()" class="text-gray-300 hover:text-white p-1">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <!-- Cart items rendered here -->
+                </div>
+
+                <div class="p-4 border-t border-gray-200 bg-gray-50 space-y-3">
+                    <div class="flex justify-between text-sm font-semibold text-gray-900">
+                        <span>Subtotal:</span>
+                        <span id="cartSubtotal" class="text-amazon-orange text-lg font-bold">$0 USD</span>
+                    </div>
+                    <p class="text-[11px] text-gray-500">Envío gratis disponible con suscripción Prime a Puerto Rico.</p>
+                    <button onclick="checkout()" class="w-full bg-amazon-yellow hover:bg-amazon-yellowHover text-amazon-blue font-bold py-2.5 rounded-lg shadow text-sm transition">
+                        Proceder al Pago (Checkout)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Quick View Modal -->
+    <div id="productModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black bg-opacity-60">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden relative max-h-[90vh] flex flex-col md:flex-row">
+            <button onclick="closeModal()" class="absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-full w-8 h-8 flex items-center justify-center z-10">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="md:w-1/2 bg-gray-50 p-6 flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-200">
+                <img id="modalImage" src="" alt="" class="max-h-64 object-contain rounded">
+            </div>
+
+            <div class="md:w-1/2 p-6 overflow-y-auto flex flex-col justify-between">
+                <div>
+                    <span id="modalCategory" class="text-xs uppercase font-bold tracking-wider text-amazon-orange"></span>
+                    <h3 id="modalTitle" class="text-lg font-bold text-gray-900 mt-1"></h3>
+                    
+                    <div id="modalRating" class="flex items-center space-x-1 my-2 text-xs text-amber-500"></div>
+
+                    <div class="text-xl font-extrabold text-amazon-orange my-2">
+                        <span id="modalPrice"></span>
+                        <span id="modalPriceWords" class="block text-xs font-normal text-gray-500 italic mt-0.5"></span>
+                    </div>
+
+                    <p id="modalDescription" class="text-xs text-gray-600 leading-relaxed my-3 bg-gray-50 p-2.5 rounded border border-gray-100"></p>
+
+                    <div class="my-3">
+                        <label class="text-xs font-bold text-gray-700 block mb-1">Color Seleccionado:</label>
+                        <div id="modalColors" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-gray-200 flex items-center gap-3">
+                    <div class="w-20">
+                        <label class="text-[10px] font-bold text-gray-500 block mb-0.5">Cantidad</label>
+                        <select id="modalQty" class="w-full text-xs p-1.5 border border-gray-300 rounded focus:ring-amazon-yellow">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <button id="modalAddBtn" class="flex-1 bg-amazon-yellow hover:bg-amazon-yellowHover text-amazon-blue font-bold py-2 px-4 rounded shadow text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cart-plus"></i> Añadir al Carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-amazon-blue text-white px-4 py-3 rounded-lg shadow-xl z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3 border-l-4 border-amazon-yellow">
+        <i class="fa-solid fa-circle-check text-amazon-yellow text-lg"></i>
+        <span id="toastMessage" class="text-xs font-semibold">Producto añadido al carrito</span>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Catalog Data Model exactly matching user instructions
+        const products = [
+            // SECTION 1
+            {
+                id: 1,
+                section: 1,
+                name: "Camisa guayabera tradicional",
+                rating: "(128) ★★",
+                ratingScore: 4.8,
+                price: 45,
+                priceWords: "cuarenta y cinco dólares",
+                image: "https://www.pennersinc.com/cdn/shop/products/pocolocowhite.jpg?v=1774563095",
+                description: "Esta camisa es elegante, fresca y perfecta para eventos formales. Yo pienso que esta ropa es muy cómoda.",
+                colors: ["Blanco", "azul claro", "beige", "verde oliva"],
+                category: "Ropa Tradicional"
+            },
+            {
+                id: 2,
+                section: 1,
+                name: "Blusa bordada tradicional",
+                rating: "★24★☆",
+                ratingScore: 4.2,
+                price: 40,
+                priceWords: "cuarenta dólares",
+                image: "https://media.johnlewiscontent.com/i/John%20Lewis/011251897?fmt=auto&$background-off-white$",
+                description: "La blusa es bonita y hecha de algodón suave. La blusa cuesta cuarenta dólares en nuestra tienda.",
+                colors: ["Blanco", "rojo", "azul", "rosa", "amarillo"],
+                category: "Ropa Tradicional"
+            },
+            {
+                id: 3,
+                section: 1,
+                name: "Jipao (vestido folklórico)",
+                rating: "(210) ★★",
+                ratingScore: 4.9,
+                price: 90,
+                priceWords: "noventa dólares",
+                image: "https://media.johnlewiscontent.com/i/John%20Lewis/009995884alt3?fmt=auto&$background-off-white$&$rsp-pdp-port-640$",
+                description: "El vestido es tradicional y muy amplio para bailes. Muchas personas quieren llevar este vestido.",
+                colors: ["Rojo", "blanco", "azul", "amarillo", "verde"],
+                category: "Ropa Tradicional"
+            },
+            {
+                id: 4,
+                section: 1,
+                name: "Camisa de lino moderna",
+                rating: "(76)",
+                ratingScore: 4.4,
+                price: 35,
+                priceWords: "treinta y cinco dólares",
+                image: "https://media.johnlewiscontent.com/i/John%20Lewis/010122675?fmt=auto&$background-off-white$",
+                description: "La camisa es ligera y perfecta para el verano. Yo prefiero llevar camisas de lino cuando hace calor.",
+                colors: ["Blanco", "beige", "azul claro", "negro"],
+                category: "Ropa Tradicional / Lino"
+            },
+            // SECTION 2
+            {
+                id: 5,
+                section: 2,
+                name: "Pantalón de lino moderno",
+                rating: "(92) ★★★★",
+                ratingScore: 4.6,
+                price: 50,
+                priceWords: "cincuenta dólares",
+                image: "https://media.johnlewiscontent.com/i/John%20Lewis/009659593?fmt=auto&$background-off-white$",
+                description: "El pantalón es beige y muy cómodo. El pantalón cuesta cincuenta dólares.",
+                colors: ["Beige", "blanco", "negro", "azul marino", "verde"],
+                category: "Pantalones"
+            },
+            {
+                id: 6,
+                section: 2,
+                name: "Short de cycling moderno",
+                rating: "(45) ★★★☆",
+                ratingScore: 4.1,
+                price: 30,
+                priceWords: "treinta dólares",
+                image: "http://www.dogoodco.in/cdn/shop/files/Bibshort.jpg?v=1727153465",
+                description: "El short es elástico y negro. Los atletas prefieren este short para hacer ejercicio.",
+                colors: ["Negro", "beige", "azul marino", "verde oliva", "rojo"],
+                category: "Shorts / Deportivo"
+            },
+            {
+                id: 7,
+                section: 2,
+                name: "Pantalón corto de mezclilla",
+                rating: "(115) ★★★★",
+                ratingScore: 4.5,
+                price: 40,
+                priceWords: "cuarenta dólares",
+                image: "https://as2.ftcdn.net/v2/jpg/02/73/65/15/1000_F_273651552_scS0gvaMa66aQM0NyH3PvoPea7513mdl.jpg",
+                description: "El pantalón corto es azul y casual. Muchos jóvenes quieren usar shorts de mezclilla.",
+                colors: ["Azul", "negro", "blanco", "gris", "verde"],
+                category: "Shorts"
+            },
+            {
+                id: 8,
+                section: 2,
+                name: "T-shirt de algodón moderno",
+                rating: "(310) ★★★★★",
+                ratingScore: 4.9,
+                price: 20,
+                priceWords: "veinte dólares",
+                image: "http://nobero.com/cdn/shop/files/White_26f7b17c-40c5-47b3-8532-c30f694e8bf7.jpg?v=1774953104",
+                description: "La camiseta es blanca, suave y sencilla. Yo pienso que es una camiseta básica perfecta.",
+                colors: ["Blanco", "negro", "gris", "azul", "verde"],
+                category: "Camisetas"
+            },
+            {
+                id: 9,
+                section: 2,
+                name: "Camiseta de baloncesto",
+                rating: "(88) ★★★★",
+                ratingScore: 4.3,
+                price: 40,
+                priceWords: "cuarenta dólares",
+                image: "https://as2.ftcdn.net/v2/jpg/05/24/78/93/1000_F_524789309_IYAgpWSJRapCecmxGICMFAFp3tlueaZT.jpg",
+                description: "La camiseta deportiva es roja y azul. Mis amigos quieren jugar baloncesto con esta ropa.",
+                colors: ["Blanco", "rojo", "azul", "negro", "gris"],
+                category: "Deportivo"
+            },
+            {
+                id: 10,
+                section: 2,
+                name: "Zapatillas deportivas modernas",
+                rating: "(264) ★★★★★",
+                ratingScore: 4.8,
+                price: 75,
+                priceWords: "setenta y cinco dólares",
+                image: "https://as2.ftcdn.net/v2/jpg/03/02/56/37/1000_F_302563763_IA97VvfTK7goReklfhxovmXsQAuZafkj.jpg",
+                description: "Las zapatillas son blancas y modernas. Yo prefiero llevar estas zapatillas todos los días.",
+                colors: ["Blanco", "negro", "gris", "azul marino"],
+                category: "Zapatillas"
+            }
+        ];
+
+        // State Tracking
+        let cart = [];
+        let selectedColors = {}; // product.id -> selectedColor string
+
+        // Initialize App
+        window.onload = function() {
+            // Set default selected color for each product
+            products.forEach(p => {
+                selectedColors[p.id] = p.colors[0];
+            });
+            renderProducts();
+        };
+
+        // Render Product Cards into DOM
+        function renderProducts() {
+            const section1Grid = document.getElementById('grid-section-1');
+            const section2Grid = document.getElementById('grid-section-2');
+
+            section1Grid.innerHTML = '';
+            section2Grid.innerHTML = '';
+
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const categoryFilter = document.getElementById('categorySelect').value;
+            const sortVal = document.getElementById('sortSelect').value;
+
+            // Filter products
+            let filtered = products.filter(p => {
+                const matchesSearch = p.name.toLowerCase().includes(searchTerm) || 
+                                      p.description.toLowerCase().includes(searchTerm) ||
+                                      p.colors.some(c => c.toLowerCase().includes(searchTerm));
+                
+                const matchesCategory = categoryFilter === 'all' || p.section.toString() === categoryFilter;
+
+                return matchesSearch && matchesCategory;
+            });
+
+            // Sort products
+            if (sortVal === 'price-low') {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sortVal === 'price-high') {
+                filtered.sort((a, b) => b.price - a.price);
+            } else if (sortVal === 'rating') {
+                filtered.sort((a, b) => b.ratingScore - a.ratingScore);
+            }
+
+            // Render
+            let s1Count = 0;
+            let s2Count = 0;
+
+            filtered.forEach(product => {
+                const cardHtml = createProductCardHTML(product);
+                if (product.section === 1) {
+                    section1Grid.insertAdjacentHTML('beforeend', cardHtml);
+                    s1Count++;
+                } else {
+                    section2Grid.insertAdjacentHTML('beforeend', cardHtml);
+                    s2Count++;
+                }
+            });
+
+            // Toggle empty section visibility
+            document.getElementById('section1-container').style.display = s1Count > 0 ? 'block' : 'none';
+            document.getElementById('section2-container').style.display = s2Count > 0 ? 'block' : 'none';
+        }
+
+        // Generate HTML for individual product card
+        function createProductCardHTML(product) {
+            const activeColor = selectedColors[product.id] || product.colors[0];
+
+            // Render color pills
+            const colorPills = product.colors.map(color => {
+                const isActive = color === activeColor;
+                return `
+                    <button onclick="selectColor(event, ${product.id}, '${color}')" 
+                            title="${color}"
+                            class="px-2 py-0.5 text-[10px] rounded border ${isActive ? 'bg-amazon-blue text-white font-bold border-amazon-blue' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'} transition">
+                        ${color}
+                    </button>
+                `;
+            }).join('');
+
+            return `
+                <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition group">
+                    <div class="p-4 flex-1 flex flex-col">
+                        <!-- Image Container -->
+                        <div class="relative w-full h-48 bg-gray-50 rounded mb-3 overflow-hidden flex items-center justify-center p-2 cursor-pointer" onclick="openModal(${product.id})">
+                            <img src="${product.image}" 
+                                 alt="${product.name}" 
+                                 onerror="this.onerror=null; this.src='https://placehold.co/300x300/f3f4f6/374151?text=${encodeURIComponent(product.name)}';" 
+                                 class="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-300">
+                            <span class="absolute top-2 left-2 bg-amazon-blue text-white text-[10px] px-2 py-0.5 rounded font-semibold opacity-90">
+                                #${product.id}
+                            </span>
+                        </div>
+
+                        <!-- Product Title -->
+                        <h3 onclick="openModal(${product.id})" class="font-bold text-gray-900 text-sm hover:text-amazon-orange cursor-pointer line-clamp-2 leading-snug mb-1">
+                            ${product.name}
+                        </h3>
+
+                        <!-- Rating -->
+                        <div class="flex items-center space-x-1 mb-2 text-xs text-amber-500">
+                            <i class="fa-solid fa-star"></i>
+                            <span class="font-bold text-gray-700 text-[11px]">${product.rating}</span>
+                        </div>
+
+                        <!-- Price Section -->
+                        <div class="mb-3">
+                            <div class="flex items-baseline space-x-1">
+                                <span class="text-xs font-bold text-amazon-orange">$</span>
+                                <span class="text-xl font-extrabold text-amazon-orange">${product.price}</span>
+                                <span class="text-xs text-gray-500 font-semibold">USD</span>
+                            </div>
+                            <div class="text-[11px] text-gray-500 italic font-medium">
+                                (${product.priceWords})
+                            </div>
+                        </div>
+
+                        <!-- Description snippet -->
+                        <p class="text-xs text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                            ${product.description}
+                        </p>
+
+                        <!-- Interactive Color Selection -->
+                        <div class="mt-auto pt-2 border-t border-gray-100">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                                Colores disponibles:
+                            </label>
+                            <div class="flex flex-wrap gap-1">
+                                ${colorPills}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer Controls -->
+                    <div class="p-4 bg-gray-50 border-t border-gray-100 flex items-center gap-2">
+                        <select id="qty-${product.id}" class="text-xs border border-gray-300 rounded p-1.5 bg-white text-gray-800 focus:outline-none">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <button onclick="addToCart(${product.id})" class="flex-1 bg-amazon-yellow hover:bg-amazon-yellowHover text-amazon-blue font-bold py-1.5 px-3 rounded shadow text-xs transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-cart-plus"></i>
+                            <span>Agregar</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Interactive Color selection handler
+        function selectColor(event, productId, color) {
+            event.stopPropagation();
+            selectedColors[productId] = color;
+            renderProducts();
+        }
+
+        // Cart Logic
+        function addToCart(productId, customQty = null, customColor = null) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const qtySelect = document.getElementById(`qty-${productId}`);
+            const qty = customQty || (qtySelect ? parseInt(qtySelect.value) : 1);
+            const color = customColor || selectedColors[productId] || product.colors[0];
+
+            // Check if existing in cart
+            const existingIndex = cart.findIndex(item => item.id === productId && item.color === color);
+
+            if (existingIndex > -1) {
+                cart[existingIndex].qty += qty;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    color: color,
+                    qty: qty
+                });
+            }
+
+            updateCartUI();
+            showToast(`Añadido: ${product.name} (${color}) x${qty}`);
+        }
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartCount').innerText = totalCount;
+
+            const container = document.getElementById('cartItemsContainer');
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-400">
+                        <i class="fa-solid fa-basket-shopping text-4xl mb-2"></i>
+                        <p class="text-sm">Tu carrito está vacío.</p>
+                    </div>
+                `;
+                document.getElementById('cartSubtotal').innerText = '$0 USD';
+                return;
+            }
+
+            let html = '';
+            let subtotal = 0;
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.qty;
+                subtotal += itemTotal;
+
+                html += `
+                    <div class="flex items-center space-x-3 p-2 bg-gray-50 rounded border border-gray-200">
+                        <img src="${item.image}" alt="${item.name}" class="w-14 h-14 object-contain rounded bg-white p-1 border">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-bold text-gray-800 truncate">${item.name}</h4>
+                            <p class="text-[11px] text-gray-500">Color: <span class="font-semibold text-gray-700">${item.color}</span></p>
+                            <p class="text-xs font-bold text-amazon-orange">$${item.price} USD x ${item.qty}</p>
+                        </div>
+                        <div class="flex flex-col items-end space-y-1">
+                            <span class="text-xs font-extrabold text-gray-900">$${itemTotal}</span>
+                            <button onclick="removeFromCart(${index})" class="text-xs text-red-500 hover:text-red-700">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('cartSubtotal').innerText = `$${subtotal} USD`;
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cartDrawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                showToast("Tu carrito está vacío.");
+                return;
+            }
+            alert("¡Gracias por tu compra en Zaki's Zapatos! Tu pedido ha sido procesado para entrega en Puerto Rico.");
+            cart = [];
+            updateCartUI();
+            toggleCartDrawer();
+        }
+
+        // Modal View Logic
+        function openModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('modalImage').src = product.image;
+            document.getElementById('modalTitle').innerText = product.name;
+            document.getElementById('modalCategory').innerText = product.category;
+            document.getElementById('modalPrice').innerText = `$${product.price} USD`;
+            document.getElementById('modalPriceWords').innerText = `(${product.priceWords})`;
+            document.getElementById('modalDescription').innerText = product.description;
+            
+            document.getElementById('modalRating').innerHTML = `
+                <i class="fa-solid fa-star text-amber-500"></i>
+                <span class="font-bold text-gray-800">${product.rating}</span>
+            `;
+
+            // Color Selector inside modal
+            let selectedModalColor = selectedColors[product.id] || product.colors[0];
+            const colorsContainer = document.getElementById('modalColors');
+            colorsContainer.innerHTML = product.colors.map(color => `
+                <button onclick="setModalColor('${color}')" class="modal-color-btn px-2.5 py-1 text-xs rounded border ${color === selectedModalColor ? 'bg-amazon-blue text-white font-bold' : 'bg-gray-100 text-gray-700'}">
+                    ${color}
+                </button>
+            `).join('');
+
+            // Modal Add Button
+            const addBtn = document.getElementById('modalAddBtn');
+            addBtn.onclick = function() {
+                const qty = parseInt(document.getElementById('modalQty').value);
+                addToCart(product.id, qty, selectedModalColor);
+                closeModal();
+            };
+
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function setModalColor(color) {
+            document.querySelectorAll('.modal-color-btn').forEach(btn => {
+                if (btn.innerText.trim() === color) {
+                    btn.className = 'modal-color-btn px-2.5 py-1 text-xs rounded border bg-amazon-blue text-white font-bold';
+                } else {
+                    btn.className = 'modal-color-btn px-2.5 py-1 text-xs rounded border bg-gray-100 text-gray-700';
+                }
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('productModal').classList.add('hidden');
+        }
+
+        // Search & Category Navigation Filters
+        function handleSearch() {
+            renderProducts();
+        }
+
+        function handleCategoryFilter() {
+            renderProducts();
+        }
+
+        function filterNav(type) {
+            const catSelect = document.getElementById('categorySelect');
+            const searchInput = document.getElementById('searchInput');
+
+            if (type === '1' || type === '2') {
+                catSelect.value = type;
+                searchInput.value = '';
+            } else if (type === 'pants') {
+                catSelect.value = 'all';
+                searchInput.value = 'pantalón';
+            } else if (type === 'shoes') {
+                catSelect.value = 'all';
+                searchInput.value = 'zapatillas';
+            } else if (type === 'deals') {
+                catSelect.value = 'all';
+                searchInput.value = '';
+                document.getElementById('sortSelect').value = 'price-low';
+            } else if (type === 'bestsellers') {
+                catSelect.value = 'all';
+                searchInput.value = '';
+                document.getElementById('sortSelect').value = 'rating';
+            } else {
+                catSelect.value = 'all';
+                searchInput.value = '';
+            }
+
+            renderProducts();
+        }
+
+        function resetFilters() {
+            document.getElementById('categorySelect').value = 'all';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('sortSelect').value = 'default';
+            renderProducts();
+        }
+
+        // Toast Notification System
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
